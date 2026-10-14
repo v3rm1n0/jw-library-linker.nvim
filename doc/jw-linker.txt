@@ -1,0 +1,71 @@
+*jw-linker.txt*  Insert JW Library / Pergament links for Bible references
+
+==============================================================================
+CONTENTS                                                   *jw-linker*
+
+Turns Bible references in Markdown notes into links for JW Library, jw.org,
+wol.jw.org or any app with a URL scheme (e.g. Pergament).
+
+Recognised forms: `Joh 3:16`, `Joh 3,16`, `1. Mose 1:1-3`, `1Kö 18:21`,
+`Mat 5:3-6:4`, `Ps 23` (whole chapter), `Jud 9` (single-chapter book),
+German and English book names and abbreviations.
+
+==============================================================================
+SETUP                                                      *jw-linker-setup*
+
+>lua
+    require("jw-linker").setup({
+      target = "jwlibrary",      -- "jwlibrary" | "jworg" | "wol" | "pergament" | ...
+      open_target = nil,         -- template used for opening; nil = target
+      locale = "X",              -- wtlocale ("X" German, "E" English)
+      pub = nil,                 -- e.g. "nwtsty"
+      languages = { "de", "en" },
+      templates = { pergament = "pergament://..." },
+      link_format = "[{label}]({url})",
+      open_cmd = nil,            -- e.g. { "xdg-open" }
+      filetypes = { "markdown" },
+      keymaps = { ... },         -- see |jw-linker-keymaps|
+    })
+<
+Template placeholders: {bible} {book} {book2} {chapter} {verse}
+{end_chapter} {end_verse} {locale} {pub} {pub_param} {ref}.
+A template may also be a function `function(ref, vars) return url end`.
+
+==============================================================================
+COMMANDS                                                   *jw-linker-commands*
+
+:JWLink [ref]                                              *:JWLink*
+    With [ref]: insert a link for it at the cursor.
+    With a visual range: link the selected text.
+    Otherwise: link the reference under the cursor, or prompt for one.
+
+:JWLinkOpen [ref]                                          *:JWLinkOpen*
+    Like |:JWLink| and also open the passage.
+
+:JWOpen [ref]                                              *:JWOpen*
+    Open [ref], or the link/reference under the cursor.
+
+==============================================================================
+KEYMAPS                                                    *jw-linker-keymaps*
+
+Buffer-local for `filetypes` (global if the list is empty). Set to false to
+disable.
+
+    insert_link       <C-g>l      insert: link reference before cursor
+    insert_link_open  <C-g>o      insert: link and open
+    link              <leader>jl  normal/visual: link
+    link_open         <leader>jo  normal/visual: link and open
+    open              <leader>jg  normal: open link/reference under cursor
+
+==============================================================================
+LUA API                                                    *jw-linker-api*
+
+    require("jw-linker").url(text, target?)        build a URL
+    require("jw-linker").link_before_cursor(opts?) opts = { open = true }
+    require("jw-linker").link_under_cursor(opts?)
+    require("jw-linker").link_selection(opts?)
+    require("jw-linker").open_under_cursor()
+    require("jw-linker").insert(text, opts?)
+    require("jw-linker").prompt(opts?)
+
+ vim:tw=78:ts=8:ft=help:norl:
