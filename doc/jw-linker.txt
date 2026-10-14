@@ -51,10 +51,10 @@ KEYMAPS                                                    *jw-linker-keymaps*
 Buffer-local for `filetypes` (global if the list is empty). Set to false to
 disable.
 
-    insert_link       <C-g>l      insert: link reference before cursor
-    insert_link_open  <C-g>o      insert: link and open
-    link              <leader>jl  normal/visual: link
-    link_open         <leader>jo  normal/visual: link and open
+    insert_link       (off)       insert: link reference before cursor
+    insert_link_open  (off)       insert: link and open
+    link              <leader>gl  normal/visual: link
+    link_open         <leader>go  normal/visual: link and open
     open              <leader>jg  normal: open link/reference under cursor
 
 ==============================================================================

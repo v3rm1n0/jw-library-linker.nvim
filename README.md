@@ -5,15 +5,15 @@ JW Library links – or links for any other app such as Pergament – and option
 open the passage right away.
 
 ```
-Joh 3:16▌   --<C-g>l-->   [Joh 3:16](jwlibrary:///finder?…&bible=43003016)▌
+Joh 3:16  --<Esc><leader>gl-->  [Joh 3:16](jwlibrary:///finder?…&bible=43003016)▌
 ```
 
 ## Features
 
 - Recognises German and English book names and abbreviations
   (`Joh 3:16`, `Joh 3,16`, `1. Mose 1:1-3`, `1Kö 18:21`, `Mat 5:3-6:4`, `Ps 23`, `Jud 9`, `Revelation 21:4`)
-- Insert mode: link the reference you just typed, with or without opening it
-- Normal/visual mode: link the reference under the cursor or the selection
+- Link the reference under the cursor or the selection, with or without opening it
+- Optional insert-mode keymaps to link the reference you just typed
 - Open the link or plain reference under the cursor
 - Targets: JW Library app, Pergament, jw.org, wol.jw.org, or your own URL template
 
@@ -32,15 +32,19 @@ lazy.nvim:
 
 ## Usage
 
-| Mode   | Default key  | Command         | Action                                          |
-| ------ | ------------ | --------------- | ----------------------------------------------- |
-| insert | `<C-g>l`     |                 | link the reference before the cursor            |
-| insert | `<C-g>o`     |                 | link it **and** open the passage                |
-| normal | `<leader>jl` | `:JWLink`       | link the reference under the cursor (or prompt) |
-| normal | `<leader>jo` | `:JWLinkOpen`   | link and open                                   |
-| visual | `<leader>jl` | `:'<,'>JWLink`  | link the selection                              |
-| visual | `<leader>jo` | `:'<,'>JWLinkOpen` | link the selection and open                  |
-| normal | `<leader>jg` | `:JWOpen`       | open the link/reference under the cursor        |
+| Mode   | Default key  | Command            | Action                                          |
+| ------ | ------------ | ------------------ | ----------------------------------------------- |
+| normal | `<leader>gl` | `:JWLink`          | link the reference under the cursor (or prompt) |
+| normal | `<leader>go` | `:JWLinkOpen`      | link and open the passage                       |
+| visual | `<leader>gl` | `:'<,'>JWLink`     | link the selection                              |
+| visual | `<leader>go` | `:'<,'>JWLinkOpen` | link the selection and open                     |
+| normal | `<leader>jg` | `:JWOpen`          | open the link/reference under the cursor        |
+
+Typical flow: type `Joh 3:16`, press `<Esc>` – the cursor sits on the reference –
+then `<leader>gl` or `<leader>go`.
+
+Insert-mode keymaps (`insert_link`, `insert_link_open`) are off by default; set
+them to a key that is not part of normal typing, e.g. `<C-l>`.
 
 `:JWLink Joh 3:16` and `:JWLinkOpen Joh 3:16` insert a link for the given reference
 at the cursor. `:JWOpen Joh 3:16` only opens it.
@@ -68,10 +72,10 @@ require("jw-linker").setup({
   open_cmd = nil,         -- e.g. { "xdg-open" }; nil = vim.ui.open()
   filetypes = { "markdown" }, -- buffer-local keymaps; {} = global keymaps
   keymaps = {
-    insert_link = "<C-g>l",
-    insert_link_open = "<C-g>o",
-    link = "<leader>jl",
-    link_open = "<leader>jo",
+    insert_link = false,
+    insert_link_open = false,
+    link = "<leader>gl",
+    link_open = "<leader>go",
     open = "<leader>jg",
   },
 })
