@@ -2,9 +2,10 @@
 
 ==============================================================================
 CONTENTS                                                   *jw-linker*
-
 Turns Bible references in Markdown notes into links for JW Library, jw.org,
-wol.jw.org or any app with a URL scheme (e.g. Pergament).
+wol.jw.org, Pergament (`pergament://bible/B:C:V-B:C:V`) or any app with a
+URL scheme.
+wol.jw.org Pergament (`pergament://bible/B:C:V-B:C:V`) or any app with a URL scheme.
 
 Recognised forms: `Joh 3:16`, `Joh 3,16`, `1. Mose 1:1-3`, `1Kö 18:21`,
 `Mat 5:3-6:4`, `Ps 23` (whole chapter), `Jud 9` (single-chapter book),
@@ -20,7 +21,7 @@ SETUP                                                      *jw-linker-setup*
       locale = "X",              -- wtlocale ("X" German, "E" English)
       pub = nil,                 -- e.g. "nwtsty"
       languages = { "de", "en" },
-      templates = { pergament = "pergament://..." },
+      templates = { mine = "myapp://{book}/{chapter}/{verse}" },
       link_format = "[{label}]({url})",
       open_cmd = nil,            -- e.g. { "xdg-open" }
       filetypes = { "markdown" },

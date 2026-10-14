@@ -15,7 +15,7 @@ Joh 3:16▌   --<C-g>l-->   [Joh 3:16](jwlibrary:///finder?…&bible=43003016)�
 - Insert mode: link the reference you just typed, with or without opening it
 - Normal/visual mode: link the reference under the cursor or the selection
 - Open the link or plain reference under the cursor
-- Targets: JW Library app, jw.org, wol.jw.org, or your own URL template (e.g. Pergament)
+- Targets: JW Library app, Pergament, jw.org, wol.jw.org, or your own URL template
 
 ## Installation
 
@@ -62,6 +62,7 @@ require("jw-linker").setup({
     jwlibrary = "jwlibrary:///finder?srcid=jwlshare&wtlocale={locale}&prefer=lang&bible={bible}{pub_param}",
     jworg = "https://www.jw.org/finder?srcid=jwlshare&wtlocale={locale}&prefer=lang&bible={bible}{pub_param}",
     wol = "https://wol.jw.org/finder?wtlocale={locale}&bible={bible}{pub_param}",
+    pergament = <built-in function>,
   },
   link_format = "[{label}]({url})", -- or function(label, url, ref)
   open_cmd = nil,         -- e.g. { "xdg-open" }; nil = vim.ui.open()
@@ -80,16 +81,14 @@ Set any keymap to `false` to disable it.
 
 ### Pergament
 
-Add a `pergament` template and select it as target:
+[Pergament](https://github.com/v3rm1n0/pergament) is a built-in target and gets
+`pergament://bible/B:C:V-B:C:V` links (`pergament://bible/B:C` for whole chapters):
 
 ```lua
-require("jw-linker").setup({
-  target = "pergament",
-  templates = {
-    pergament = "pergament://…{book}…{chapter}…{verse}…", -- your app's URL scheme
-  },
-})
+require("jw-linker").setup({ target = "pergament" })
 ```
+
+### Custom templates
 
 Template placeholders:
 
