@@ -12,6 +12,8 @@ Joh 3:16  --<Esc><leader>gl-->  [Joh 3:16](jwlibrary:///finder?…&bible=4300301
 
 - Recognises German and English book names and abbreviations
   (`Joh 3:16`, `Joh 3,16`, `1. Mose 1:1-3`, `1Kö 18:21`, `Mat 5:3-6:4`, `Ps 23`, `Jud 9`, `Revelation 21:4`)
+- Verse lists: `1. Ko 8:4, 7`, `Mat 5:3; 6:9-13`, `Joh 3,16.18` – every part gets its own link,
+  separators stay as typed: `[1. Ko 8:4](…), [7](…)`
 - Link the reference under the cursor or the selection, with or without opening it
 - Optional insert-mode keymaps to link the reference you just typed
 - Open the link or plain reference under the cursor
@@ -50,6 +52,7 @@ them to a key that is not part of normal typing, e.g. `<C-l>`.
 at the cursor. `:JWOpen Joh 3:16` only opens it.
 
 A reference that is already the label of a Markdown link is not linked a second time.
+For verse lists, "open" opens the first part.
 
 ## Configuration
 
