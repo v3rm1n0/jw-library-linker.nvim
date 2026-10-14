@@ -47,16 +47,17 @@ local function notify(msg, level)
 end
 
 --- Build the URL for a reference string or parsed reference.
+--- For a list ("1. Ko 8:4, 7") this is the URL of its first part.
 ---@param ref string|JwRef
 ---@param target? string
 ---@return string|nil, string|nil
 function M.url(ref, target)
   if type(ref) == "string" then
-    local parsed = parser.parse(ref, M.config.languages)
-    if not parsed then
+    local cit = parser.parse(ref, M.config.languages)
+    if not cit then
       return nil, ("jw-linker: could not parse %q"):format(ref)
     end
-    ref = parsed
+    ref = cit.refs[1]
   end
   return url.build(ref, target or M.config.target, M.config)
 end
@@ -91,15 +92,33 @@ local function open_ref(ref)
   M.open_url(u)
 end
 
---- Replace bytes [s, e] (1-based, inclusive) of `row` with a link for `ref`.
---- Returns the 0-based column right after the inserted link.
-local function replace(row, s, e, ref)
-  local u, err = url.build(ref, M.config.target, M.config)
-  if not u then
-    notify(err, vim.log.levels.ERROR)
+--- Markdown for a citation: every part linked, separators kept as written.
+---@param cit JwCitation
+---@return string|nil
+local function render(cit)
+  local out = {}
+  for _, piece in ipairs(cit.pieces) do
+    if piece.ref then
+      local u, err = url.build(piece.ref, M.config.target, M.config)
+      if not u then
+        notify(err, vim.log.levels.ERROR)
+        return nil
+      end
+      table.insert(out, format_link(piece.ref, u))
+    else
+      table.insert(out, piece.text)
+    end
+  end
+  return table.concat(out)
+end
+
+--- Replace bytes [s, e] (1-based, inclusive) of `row` with links for `cit`.
+--- Returns the 0-based column right after the inserted links.
+local function replace(row, s, e, cit)
+  local link = render(cit)
+  if not link then
     return nil
   end
-  local link = format_link(ref, u)
   vim.api.nvim_buf_set_text(0, row - 1, s - 1, row - 1, e, { link })
   return s - 1 + #link
 end
@@ -120,11 +139,11 @@ function M.link_before_cursor(opts)
   if not m then
     return notify("jw-linker: no scripture reference before cursor")
   end
-  local after = replace(row, m.s, m.e, m.ref)
+  local after = replace(row, m.s, m.e, m.cit)
   if after then
     vim.api.nvim_win_set_cursor(0, { row, after + (#before - #trimmed) })
     if opts.open then
-      open_ref(m.ref)
+      open_ref(m.cit.refs[1])
     end
   end
 end
@@ -133,17 +152,17 @@ end
 ---@param opts? { open?: boolean }
 function M.insert(text, opts)
   opts = opts or {}
-  local ref = parser.parse(text, M.config.languages)
-  if not ref then
+  local cit = parser.parse(text, M.config.languages)
+  if not cit then
     return notify(("jw-linker: could not parse %q"):format(text))
   end
-  local u, err = url.build(ref, M.config.target, M.config)
-  if not u then
-    return notify(err, vim.log.levels.ERROR)
+  local link = render(cit)
+  if not link then
+    return
   end
-  vim.api.nvim_put({ format_link(ref, u) }, "c", true, true)
+  vim.api.nvim_put({ link }, "c", true, true)
   if opts.open then
-    open_ref(ref)
+    open_ref(cit.refs[1])
   end
 end
 
@@ -169,15 +188,15 @@ function M.link_under_cursor(opts)
   end
   if already_linked(line, m) then
     if opts.open then
-      open_ref(m.ref)
+      open_ref(m.cit.refs[1])
     end
     return
   end
-  local after = replace(row, m.s, m.e, m.ref)
+  local after = replace(row, m.s, m.e, m.cit)
   if after then
     vim.api.nvim_win_set_cursor(0, { row, math.max(after - 1, 0) })
     if opts.open then
-      open_ref(m.ref)
+      open_ref(m.cit.refs[1])
     end
   end
 end
@@ -195,18 +214,18 @@ function M.link_selection(opts)
   local last = math.min(e[3], #line)
   last = last + vim.str_utf_end(line, last)
   local text = line:sub(s[3], last)
-  local ref = parser.parse(text, M.config.languages)
-  if not ref then
+  local cit = parser.parse(text, M.config.languages)
+  if not cit then
     return notify(("jw-linker: could not parse %q"):format(text))
   end
   -- keep surrounding whitespace of the selection out of the link
   local lead = #text:match("^%s*")
   local trail = #text:match("%s*$")
-  local after = replace(row, s[3] + lead, last - trail, ref)
+  local after = replace(row, s[3] + lead, last - trail, cit)
   if after then
     vim.api.nvim_win_set_cursor(0, { row, math.max(after - 1, 0) })
     if opts.open then
-      open_ref(ref)
+      open_ref(cit.refs[1])
     end
   end
 end
@@ -224,7 +243,7 @@ function M.open_under_cursor()
   if not m then
     return notify("jw-linker: no link or reference under cursor")
   end
-  open_ref(m.ref)
+  open_ref(m.cit.refs[1])
 end
 
 --- Entry point for :JWLink / :JWLinkOpen.

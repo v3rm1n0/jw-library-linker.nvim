@@ -18,8 +18,8 @@ local function eq(name, got, want)
 end
 
 local function code(text)
-  local ref = parser.parse(text, langs)
-  return ref and url.bible_code(ref)
+  local cit = parser.parse(text, langs)
+  return cit and table.concat(vim.tbl_map(url.bible_code, cit.refs), " ")
 end
 
 -- parsing / bible codes
@@ -44,7 +44,16 @@ eq("Hohes Lied", code("Hohes Lied 8:6"), "22008006")
 eq("ambiguous prefix", code("Jo 3:16"), nil)
 eq("unknown book", code("Foo 3:16"), nil)
 eq("reversed range", code("Joh 3:18-16"), nil)
-eq("verse list rejected", code("Mat 24:14, 15"), nil)
+eq("verse list", code("1. Ko 8:4,7"), "46008004 46008007")
+eq("verse list with spaces", code("Mat 24:14, 15"), "40024014 40024015")
+eq("list with range", code("Ps 83:1, 18-20"), "19083001 19083018-19083020")
+eq("list with new chapter", code("Mat 5:3; 6:9-13"), "40005003 40006009-40006013")
+eq("list item with chapter", code("Joh 3:16, 4:2"), "43003016 43004002")
+eq("Luther list", code("Joh 3,16.18"), "43003016 43003018")
+eq("single-chapter list", code("Jud 9, 14"), "65001009 65001014")
+eq("trailing separator", code("Joh 3:16,"), nil)
+local cit = parser.parse("1. Ko 8:4, 7", langs)
+eq("list pieces", vim.tbl_map(function(p) return p.text end, cit.pieces), { "1. Ko 8:4", ", ", "7" })
 
 -- scanning
 local m = parser.ending_at("Wie in Joh 3:16", 15, langs)
@@ -52,10 +61,15 @@ eq("ending_at span", m and { m.s, m.e }, { 8, 15 })
 m = parser.ending_at("lies 1. Mose 1:1", 16, langs)
 eq("ending_at numbered", m and { m.s, m.e }, { 6, 16 })
 m = parser.at("Siehe Mat 24:14 und so", 9, langs)
-eq("at span", m and m.ref.label, "Mat 24:14")
+eq("at span", m and m.cit.refs[1].label, "Mat 24:14")
 m = parser.at("text (Ps 23:1) text", 8, langs)
-eq("at inside parens", m and m.ref.label, "Ps 23:1")
+eq("at inside parens", m and m.cit.refs[1].label, "Ps 23:1")
 eq("plain text", parser.at("nothing here 42", 3, langs), nil)
+m = parser.at("Joh 3:16, 1. Ko 8:4", 2, langs)
+eq("list stops before next book", m and m.cit.pieces[1].text, "Joh 3:16")
+eq("next book found too", #parser.scan("Joh 3:16, 1. Ko 8:4", langs) > 0 and parser.at("Joh 3:16, 1. Ko 8:4", 12, langs).cit.refs[1].book, 46)
+m = parser.at("vgl. 1. Ko 8:4,7 und so", 8, langs)
+eq("at list span", m and { m.s, m.e }, { 6, 16 })
 
 -- url templates
 jw.setup({})
@@ -114,10 +128,16 @@ eq("visual link", vim.api.nvim_get_current_line(), "a [Offenbarung 21:3](" .. L 
 
 vim.api.nvim_buf_set_lines(0, 0, -1, true, { "" })
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
-vim.cmd("JWLink 2. Tim 3:16, 17")
-eq(":JWLink rejects lists", vim.api.nvim_get_current_line(), "")
+vim.cmd("JWLink 2. Tim 3:16 und")
+eq(":JWLink rejects junk", vim.api.nvim_get_current_line(), "")
 vim.cmd("JWLink 2. Tim 3:16-17")
 eq(":JWLink with args", vim.api.nvim_get_current_line(), "[2. Tim 3:16-17](" .. L .. "55003016-55003017)")
+
+vim.api.nvim_buf_set_lines(0, 0, -1, true, { "vgl. 1. Ko 8:4,7" })
+vim.api.nvim_win_set_cursor(0, { 1, 7 })
+jw.link_under_cursor()
+eq("list linked per part", vim.api.nvim_get_current_line(),
+  "vgl. [1. Ko 8:4](" .. L .. "46008004),[7](" .. L .. "46008007)")
 
 print(("%d/%d passed"):format(count - failures, count))
 vim.cmd(failures == 0 and "qa!" or "cq")
