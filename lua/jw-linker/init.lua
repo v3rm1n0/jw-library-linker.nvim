@@ -32,10 +32,10 @@ M.defaults = {
   filetypes = { "markdown" },
   -- Set any entry to false to disable it.
   keymaps = {
-    insert_link = "<C-g>l", -- insert mode: link the reference just typed
-    insert_link_open = "<C-g>o", -- insert mode: link it and open the passage
-    link = "<leader>jl", -- normal/visual: link reference under cursor/selection
-    link_open = "<leader>jo", -- normal/visual: link and open
+    insert_link = false, -- insert mode: link the reference just typed, e.g. "<C-l>"
+    insert_link_open = false, -- insert mode: link it and open the passage
+    link = "<leader>gl", -- normal/visual: link reference under cursor/selection
+    link_open = "<leader>go", -- normal/visual: link and open
     open = "<leader>jg", -- normal: open link/reference under cursor
   },
 }
