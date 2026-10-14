@@ -22,7 +22,7 @@ M.defaults = {
     jwlibrary = "jwlibrary:///finder?srcid=jwlshare&wtlocale={locale}&prefer=lang&bible={bible}{pub_param}",
     jworg = "https://www.jw.org/finder?srcid=jwlshare&wtlocale={locale}&prefer=lang&bible={bible}{pub_param}",
     wol = "https://wol.jw.org/finder?wtlocale={locale}&bible={bible}{pub_param}",
-    -- pergament = "pergament://...",  -- set this to your Pergament URL scheme
+    pergament = url.pergament,
   },
   -- "[{label}]({url})" with {label} and {url}, or function(label, url, ref).
   link_format = "[{label}]({url})",

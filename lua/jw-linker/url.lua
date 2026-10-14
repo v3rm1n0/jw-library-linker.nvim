@@ -12,6 +12,20 @@ function M.bible_code(ref)
   return first .. "-" .. last
 end
 
+--- Pergament link: `pergament://bible/B:C:V-B:C:V`, or `B:C[-B:C]` for whole chapters.
+---@param ref JwRef
+function M.pergament(ref)
+  if not ref.verse then
+    local first = ("%d:%d"):format(ref.book, ref.chapter)
+    if ref.end_chapter == ref.chapter then
+      return "pergament://bible/" .. first
+    end
+    return ("pergament://bible/%s-%d:%d"):format(first, ref.book, ref.end_chapter)
+  end
+  return ("pergament://bible/%d:%d:%d-%d:%d:%d"):format(
+    ref.book, ref.chapter, ref.verse, ref.book, ref.end_chapter, ref.end_verse)
+end
+
 local function urlencode(s)
   return (s:gsub("[^%w%-%._~]", function(c)
     return string.format("%%%02X", c:byte())
@@ -49,9 +63,6 @@ end
 function M.build(ref, target, opts)
   local tpl = opts.templates[target]
   if tpl == nil then
-    if target == "pergament" then
-      return nil, "jw-linker: no Pergament URL configured, set `templates.pergament` in setup()"
-    end
     return nil, ("jw-linker: unknown target %q (no entry in `templates`)"):format(target)
   end
   if type(tpl) == "function" then
